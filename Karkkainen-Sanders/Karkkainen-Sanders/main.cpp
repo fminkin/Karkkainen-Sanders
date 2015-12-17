@@ -6,7 +6,7 @@ using namespace std;
 int main() {
 	string s;
 	cin >> s;
-	vector<unsigned int> v = karkkainen_sanders::getSuffixArray(s);
+	vector<unsigned int> v = getSuffixArray(s);
 	for (auto a : v) {
 		cout << a << " ";
 	}
