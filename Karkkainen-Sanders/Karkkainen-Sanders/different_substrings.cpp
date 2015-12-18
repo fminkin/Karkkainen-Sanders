@@ -4,7 +4,10 @@
 #include <list>
 #include <algorithm>
 #include <numeric>
-
+#include <iostream>
+#define ULL unsigned long long
+#define UI unsigned int
+using namespace std;
 
 unsigned int getMax(const std::vector<unsigned int> &array) {
 	unsigned int maxValue = 0;
@@ -13,20 +16,20 @@ unsigned int getMax(const std::vector<unsigned int> &array) {
 	return maxValue;
 }
 unsigned int getPositionIn12(unsigned int arraySize,
-							unsigned int suffix) {
+	unsigned int suffix) {
 	unsigned int position = (suffix - (suffix + 2) / 3) / 2;
 	position += suffix % 3 == 2 ? (arraySize + 1) / 3 : 0;
 	return position;
 }
 
-unsigned int getByIndex(const std::vector<unsigned int> &array, 
-						unsigned int position) {
+unsigned int getByIndex(const std::vector<unsigned int> &array,
+	unsigned int position) {
 	return position < array.size() ? array[position] : 0;
 }
-bool isEqualSubsegments(const std::vector<unsigned int> &array, 
-						unsigned int firstSubsegment,
-						unsigned int secondSubsegment, 
-						unsigned int size) {
+bool isEqualSubsegments(const std::vector<unsigned int> &array,
+	unsigned int firstSubsegment,
+	unsigned int secondSubsegment,
+	unsigned int size) {
 	for (unsigned int offset = 0; offset < size; ++offset)
 	if (getByIndex(array, firstSubsegment + offset) != getByIndex(array, secondSubsegment + offset))
 		return false;
@@ -35,9 +38,9 @@ bool isEqualSubsegments(const std::vector<unsigned int> &array,
 
 
 bool isLowerSubsegment(const std::vector<unsigned int> &array,
-						unsigned int firstSubsegment, 
-						unsigned int secondSubsegment, 
-						unsigned int size) {
+	unsigned int firstSubsegment,
+	unsigned int secondSubsegment,
+	unsigned int size) {
 	unsigned int offset;
 	for (offset = 0;
 		offset < size && getByIndex(array, firstSubsegment + offset) == getByIndex(array, secondSubsegment + offset);
@@ -46,9 +49,9 @@ bool isLowerSubsegment(const std::vector<unsigned int> &array,
 	return offset < size && getByIndex(array, firstSubsegment + offset) < getByIndex(array, secondSubsegment + offset);
 }
 bool isLower(const std::vector<unsigned int> &array,
-			unsigned int suffix0, 
-			unsigned int suffix12,
-			const std::vector<unsigned int> &reversedSuffixArray12) {
+	unsigned int suffix0,
+	unsigned int suffix12,
+	const std::vector<unsigned int> &reversedSuffixArray12) {
 	unsigned int offset = suffix12 % 3;
 	if (isEqualSubsegments(array, suffix0, suffix12, offset)) {
 		unsigned int positionIn12For0, positionIn12For12;
@@ -61,9 +64,9 @@ bool isLower(const std::vector<unsigned int> &array,
 
 
 
-std::vector<unsigned int> suffixRadixPass(const std::vector<unsigned int> &array, 
-										const std::vector<unsigned int> &suffixes, 
-										unsigned int offset) {
+std::vector<unsigned int> suffixRadixPass(const std::vector<unsigned int> &array,
+	const std::vector<unsigned int> &suffixes,
+	unsigned int offset) {
 	std::vector<unsigned int> result(suffixes.size());
 	std::vector<unsigned int> counts(getMax(array) + 1, 0);
 	for (auto suffix : suffixes)
@@ -78,8 +81,8 @@ std::vector<unsigned int> suffixRadixPass(const std::vector<unsigned int> &array
 }
 
 void suffixRadixSort(const std::vector<unsigned int> &array,
-					std::vector<unsigned int> &suffixes, 
-					unsigned int suffixSize) {
+	std::vector<unsigned int> &suffixes,
+	unsigned int suffixSize) {
 	for (unsigned int offset = 1; offset <= suffixSize; ++offset)
 		suffixes = suffixRadixPass(array, suffixes, suffixSize - offset);
 }
@@ -97,9 +100,9 @@ std::vector<unsigned int> getSuffixes12(const std::vector<unsigned int> &array) 
 		names[getPositionIn12((unsigned int)array.size(), suffixes[index])] = sortedNames[index];
 	return names;
 }
-std::vector<unsigned int> getSortedSuffixes12(const std::vector<unsigned int> &array, 
-											const std::vector<unsigned int> &reversedSuffixArray12,
-											unsigned int suffixes12_size){
+std::vector<unsigned int> getSortedSuffixes12(const std::vector<unsigned int> &array,
+	const std::vector<unsigned int> &reversedSuffixArray12,
+	unsigned int suffixes12_size){
 
 	std::vector<unsigned int> sortedSuffixes12(suffixes12_size);
 	for (unsigned int index = 0; index < array.size(); ++index) {
@@ -119,9 +122,9 @@ std::vector<unsigned int> getReversedSuffixArray12(const std::vector<unsigned in
 }
 
 std::vector<unsigned int> calculateSuffixArray(const std::vector<unsigned int> &array,
-												const std::vector<unsigned int> &sortedSuffixes0,
-												const std::vector<unsigned int> &sortedSuffixes12,
-												const std::vector<unsigned int> &reversedSuffixArray12){
+	const std::vector<unsigned int> &sortedSuffixes0,
+	const std::vector<unsigned int> &sortedSuffixes12,
+	const std::vector<unsigned int> &reversedSuffixArray12){
 	std::vector<unsigned int> suffixArray;
 	unsigned int index0, index12, suffix0, suffix12;
 	for (index0 = 0, index12 = 0;
@@ -174,4 +177,51 @@ std::vector<unsigned int> getSuffixArray(const std::string &str) {
 	for (unsigned int index = 0; index < str.size(); ++index)
 		intString[index] = (int)str[index];
 	return getSuffixArray(intString);
+}
+
+
+vector <UI> getLcp(const vector <UI> &input,
+	const vector <UI> &suffixArray) {
+	vector <UI> pos(suffixArray.size());
+	for (UI i = 0; i < suffixArray.size(); ++i) {
+		pos[suffixArray[i]] = i;
+	}
+	vector <UI> lcp(suffixArray.size() - 1, 0);
+	UI current = 0;
+	for (UI i = 0; i < suffixArray.size(); ++i) {
+		if (pos[i] == suffixArray.size() - 1) {
+			current = 0;
+			continue;
+		}
+		lcp[pos[i]] = current;
+		for (UI it = i + current,
+			j = suffixArray[pos[i] + 1] + current;
+			it < input.size() && j < input.size() && input[it] == input[j];
+		++it, ++j, ++lcp[pos[i]]) {
+		}
+		current = max(static_cast<int>(lcp[pos[i]]) - 1, 0);
+	}
+	return lcp;
+}
+ULL countSubstrings(const vector <UI> &lcp,
+	const vector <UI> &suffixArray,
+	UI length) {
+	ULL answer = length - suffixArray[0];
+	for (UI i = 1; i < length; ++i) {
+		answer += (length - suffixArray[i] - lcp[i - 1]);
+	}
+	return answer;
+}
+int main() {
+	std::string s;
+	std::cin >> s;
+	vector <UI> input(s.size());
+	for (UI i = 0; i < input.size(); ++i) {
+		input[i] = s[i] - 'a';
+	}
+	vector <UI> suffixArray = getSuffixArray(input);
+	printf("%llu\n", countSubstrings(getLcp(input, suffixArray),
+		suffixArray, input.size())
+		);
+	return 0;
 }
